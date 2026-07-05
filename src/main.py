@@ -2,7 +2,7 @@ from vkbottle import Bot
 from vkbottle.bot import run_multibot
 
 # pylint: disable=unused-import
-from . import side_actions
+from . import chat_actions, side_actions
 from .app import bot_api, group_api, route, state
 from .utils import configure_log
 
