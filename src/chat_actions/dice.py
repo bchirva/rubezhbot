@@ -5,7 +5,7 @@ from vkbottle.bot import Message
 
 from ..app import route
 
-DIE_REGEXP = re.compile("/(?P<count>[0-9]?)[dDkKдДкК](?P<edges>[0-9]+)?(?P<sign>[+-])?(?P<mod>[0-9]+)?$")
+DIE_REGEXP = re.compile("/(?P<count>[0-9]?)[dDkKдДкК](?P<edges>[0-9]+)?(?P<sign>[+-])?(?P<mod>[0-9]+)?(?P<comment>.*)?$")
 
 
 @route.chat_message(regexp=DIE_REGEXP)
@@ -18,6 +18,7 @@ async def roll_die(message: Message):
     edges = int(match.group("edges") or 20)
     sign = match.group("sign")
     mod_raw = match.group("mod")
+    comment = match.group("comment").strip()
     mod = 0
 
     if sign and mod_raw is None:
@@ -30,13 +31,16 @@ async def roll_die(message: Message):
     if count <= 0 or edges <= 0:
         return
 
-    result: str = f"🎲 Бросок кост{'ей' if count > 1 else 'и'} d{edges}: "
+    comment_text = f" ({comment})" if comment else ""
+    result: str = f"🎲 Бросок кост{'ей' if count > 1 else 'и'} d{edges}{comment_text}: "
 
     for _ in range(count):
+        rand_die = random.randint(1, edges)
+        emoji = "💀 " if rand_die == 1 else "💥 " if rand_die == edges else ""
+
         if (sign and mod_raw):
-            rand_die = random.randint(1, edges)
-            result += f"\n {rand_die + mod} ({rand_die}{sign}{mod_raw})"
+            result += f"\n {emoji}{rand_die + mod} ({rand_die}{sign}{mod_raw})"
         else:
-            result += f"\n {random.randint(1, edges)} "
+            result += f"\n {emoji}{rand_die} "
 
     await message.answer(result)
